@@ -11,7 +11,8 @@ struct RecipeFeaturedView: View {
     
     @EnvironmentObject var model:RecipeModel
     @State var isDetailViewShowing = false
-    
+    @State var tabSelectionIndex = 0
+
     var body: some View {
         
         VStack(alignment: .leading, spacing: 0) {
@@ -23,10 +24,10 @@ struct RecipeFeaturedView: View {
                 .font(.largeTitle)
             
             GeometryReader { geo in
-                TabView {
+                TabView (selection: $tabSelectionIndex ){
                     
                     // Loop through each recipe
-                    ForEach (0..<model.recipes.count) { index in
+                    ForEach (0..<model.recipes.count, id: \.self) { index in
                         
                         // Only show those that should be featured
                         if model.recipes[index].featured == true {
@@ -52,6 +53,7 @@ struct RecipeFeaturedView: View {
                                     }
                                 }
                             }
+                            .tag(index)
                             .sheet(isPresented: $isDetailViewShowing) {
                                 // Show the Recipe Detail view
                                 RecipeDetailView(recipe:model.recipes[index])
@@ -71,17 +73,46 @@ struct RecipeFeaturedView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Preparation Time")
                     .font(.headline)
-                Text("1 hour")
+                    .onAppear {
+                        setFeaturedIndex()
+                    }
+                Text(model.recipes[tabSelectionIndex].prepTime)
                 Text("Highlights")
                     .font(.headline)
-                Text("Healthy, Hearty")
+                RecipeHighlights(hightlights: model.recipes[tabSelectionIndex].highlights)
             }.padding([.bottom,.leading])
         }
+
+    }
+        
+    func setFeaturedIndex() {
+        
+        // Find the first recipe that is featured
+        let index = model.recipes.firstIndex { recipe in
+            return recipe.featured
+        }
+        tabSelectionIndex = index ?? 0
     }
 }
 
+
+
+
 struct RecipeFeaturedView_Previews: PreviewProvider {
+   
+    @EnvironmentObject var model:RecipeModel
+    @State var tabSelectionIndex = 0
+    
     static var previews: some View {
+        
         RecipeFeaturedView().environmentObject(RecipeModel())
+    }
+    func setFeaturedIndex() {
+        
+        // Find the first recipe that is featured
+        let index = model.recipes.firstIndex { recipe in
+            return recipe.featured
+        }
+        tabSelectionIndex = index ?? 0
     }
 }
