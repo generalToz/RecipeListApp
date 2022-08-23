@@ -8,9 +8,12 @@
 import SwiftUI
 
 struct RecipeTabView: View {
+    
+    @State var selectedTab = Constants.featuredTab
+    
     var body: some View {
         
-        TabView {
+        TabView (selection: $selectedTab) {
             
             RecipeFeaturedView()
                 .tabItem {
@@ -18,8 +21,17 @@ struct RecipeTabView: View {
                         Image(systemName: "star")
                         Text("Featured")
                     }
-                    
                 }
+                .tag(Constants.featuredTab)
+            
+            RecipeCategoryView(selectedTab: $selectedTab)
+                .tabItem {
+                    VStack {
+                        Image(systemName: "square.grid.2x2")
+                        Text("Categories")
+                    }
+                }
+                .tag(Constants.categoriesTab)
             
             RecipeListView()
                 .tabItem {
@@ -28,7 +40,12 @@ struct RecipeTabView: View {
                         Text("List")
                     }
                 }
-        }.environmentObject(RecipeModel())
+                .tag(Constants.listTab)
+        }
+        .onAppear {
+            UITabBar.appearance().scrollEdgeAppearance = UITabBarAppearance()
+        }
+        .environmentObject(RecipeModel())
     }
 }
 
